@@ -1,1 +1,1 @@
-#A tic-tac-toe game made in C
+# A tic-tac-toe game made in C
