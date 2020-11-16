@@ -40,13 +40,13 @@ struct Jogada
 bool menu();
 void iniciaTabuleiro(int tabuleiro[][tamanhoMatriz]);
 void exibeTabuleiro(int tabuleiro[][tamanhoMatriz]);
-void jogar(int tabuleiro[][tamanhoMatriz]);
+void jogar(int tabuleiro[][tamanhoMatriz], int *quantidadeVitoriasRobo, int *quantidadeEmpates);
 bool checaPosicao(int tabuleiro[][tamanhoMatriz], int linha, int coluna);
 bool checaLinha(int tabuleiro[][tamanhoMatriz]);
 bool checaColuna(int tabuleiro[][tamanhoMatriz]);
 bool checaDiagonal(int tabuleiro[][tamanhoMatriz]);
 bool checaEmpate(int tabuleiro[][tamanhoMatriz]);
-bool checaTermino(int tabuleiro[][tamanhoMatriz], int roboJogando);
+bool checaTermino(int tabuleiro[][tamanhoMatriz], int roboJogando, int *quantidadeVitoriasRobo, int *quantidadeEmpates);
 int zeroOuUm();
 int zeroOuDois();
 int posicaoOposta(int posicao);
@@ -102,9 +102,10 @@ static struct Jogada jogadasVencedoras[quantidadeJogadasVencedoras][tamanhoMatri
 int main()
 {
     time_t t;
-    bool continuar;
-    int tabuleiro[tamanhoMatriz][tamanhoMatriz];
     srand((unsigned)time(&t));
+
+    bool continuar;
+    int tabuleiro[tamanhoMatriz][tamanhoMatriz], quantidadeVitoriasRobo = 0, quantidadeEmpates = 0;
 
     do
     {
@@ -112,10 +113,16 @@ int main()
 
         if (continuar)
         {
-            jogar(tabuleiro);
+            jogar(tabuleiro, &quantidadeVitoriasRobo, &quantidadeEmpates);
         }
 
     } while (continuar);
+
+    printf("\t===SCOREBOARD===\n\n");
+    printf("\tQuantidade de jogos: %d\n", quantidadeVitoriasRobo + quantidadeEmpates);
+    printf("\tNumero de vitorias: %d\n", 0);
+    printf("\tNumero de derrotas: %d\n", quantidadeVitoriasRobo);
+    printf("\tNumero de empates: %d\n", quantidadeEmpates);
 
     return 0;
 }
@@ -183,7 +190,7 @@ void exibeTabuleiro(int tabuleiro[][tamanhoMatriz])
     printf("\n");
 }
 
-void jogar(int tabuleiro[][tamanhoMatriz])
+void jogar(int tabuleiro[][tamanhoMatriz], int *quantidadeVitoriasRobo, int *quantidadeEmpates)
 {
     int numeroJogadas = 0, roboJogando = 1;
     struct Jogada jogadasRobo[maximoDeJogadas], jogadasHumano[maximoDeJogadas];
@@ -195,7 +202,7 @@ void jogar(int tabuleiro[][tamanhoMatriz])
         exibeTabuleiro(tabuleiro);
         proximaJogada(tabuleiro, numeroJogadas, &roboJogando, jogadasRobo, jogadasHumano);
         numeroJogadas++;
-    } while (!checaTermino(tabuleiro, roboJogando));
+    } while (!checaTermino(tabuleiro, roboJogando, quantidadeVitoriasRobo, quantidadeEmpates));
 }
 
 bool checaPosicao(int tabuleiro[][tamanhoMatriz], int linha, int coluna)
@@ -291,7 +298,7 @@ bool checaEmpate(int tabuleiro[][tamanhoMatriz])
     return true;
 }
 
-bool checaTermino(int tabuleiro[][tamanhoMatriz], int roboJogando)
+bool checaTermino(int tabuleiro[][tamanhoMatriz], int roboJogando, int *quantidadeVitoriasRobo, int *quantidadeEmpates)
 {
     if (checaLinha(tabuleiro) || checaColuna(tabuleiro) || checaDiagonal(tabuleiro))
     {
@@ -299,6 +306,7 @@ bool checaTermino(int tabuleiro[][tamanhoMatriz], int roboJogando)
         if (roboJogando == 0)
         {
             printf("Voce perdeu!\n\n");
+            *quantidadeVitoriasRobo = *quantidadeVitoriasRobo + 1;
         }
         else
         {
@@ -311,6 +319,7 @@ bool checaTermino(int tabuleiro[][tamanhoMatriz], int roboJogando)
 
     if (checaEmpate(tabuleiro))
     {
+        *quantidadeEmpates = *quantidadeEmpates + 1;
         printf("Jogo encerrado. Deu velha!\n\n");
         exibeTabuleiro(tabuleiro);
         return true;
